@@ -147,4 +147,5 @@ Time and Personnel Metrics
 For any questions regarding about this project contact me.
 
 https://www.linkedin.com/in/luz-nataly-reguerin/
+
 nataly.reguerin3@gmail.com
