@@ -1,48 +1,161 @@
-# Astro Starter Kit: Basics
+# Yawar — Colectiva por la Sostenibilidad Menstrual
 
-```sh
-npm create astro@latest -- --template basics
-```
+Sitio web oficial de **Colectiva Yawar**, construido con [Astro](https://astro.build) y TailwindCSS.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
+---
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
+## Estructura del proyecto
 
 ```text
 /
+├── nginx/
+│   └── nginx.conf              # Configuración de Nginx (requerida para Docker)
 ├── public/
 │   └── favicon.svg
 ├── src/
+│   ├── assets/                 # Imágenes, logos e iconos
+│   ├── components/
+│   │   ├── about/
+│   │   ├── footer/
+│   │   ├── header/
+│   │   ├── hero/
+│   │   ├── info/
+│   │   └── talleres/
 │   ├── layouts/
 │   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
+│   ├── pages/
+│   │   ├── index.astro         # /
+│   │   ├── about/              # /about
+│   │   ├── talleres/           # /talleres
+│   │   ├── recursos/           # /recursos
+│   │   └── estadisticas/       # /estadisticas
+│   └── utils/
+│       ├── constants.ts
+│       └── navigation.ts
+├── Dockerfile
+├── docker-compose.yml
 └── package.json
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+---
 
-## 🧞 Commands
+## Desarrollo local
 
-All commands are run from the root of the project, from a terminal:
+Requiere [Node.js 20+](https://nodejs.org) y [pnpm](https://pnpm.io).
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+```sh
+# Instalar dependencias
+pnpm install
 
-## 👀 Want to learn more?
+# Iniciar servidor de desarrollo en localhost:4321
+pnpm dev
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+# Construir para producción (salida en ./dist/)
+pnpm build
+
+# Previsualizar la build de producción localmente
+pnpm preview
+```
+
+---
+
+## Docker
+
+### Requisitos previos
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado y corriendo
+- El archivo `nginx/nginx.conf` debe existir (ver sección siguiente)
+
+### Crear nginx/nginx.conf
+
+El `Dockerfile` requiere este archivo. Créalo en la raíz del proyecto:
+
+```sh
+mkdir -p nginx
+```
+
+Luego crea `nginx/nginx.conf` con el siguiente contenido:
+
+```nginx
+worker_processes auto;
+error_log /var/log/nginx/error.log warn;
+pid /tmp/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+    server_tokens off;
+    sendfile on;
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript
+               text/xml application/xml text/javascript image/svg+xml;
+
+    client_body_temp_path /tmp/client_body;
+    proxy_temp_path       /tmp/proxy;
+
+    server {
+        listen 8080;
+        server_name _;
+        root /usr/share/nginx/html;
+        index index.html;
+
+        location / {
+            try_files $uri $uri/ $uri.html $uri/index.html =404;
+        }
+
+        location /_astro/ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+
+        error_page 404 /404.html;
+    }
+}
+```
+
+### Construir y correr con Docker Compose
+
+```sh
+# Construir la imagen y levantar el contenedor
+docker compose up --build
+
+# Correr en segundo plano
+docker compose up --build -d
+
+# Ver logs del contenedor
+docker compose logs -f
+
+# Detener el contenedor
+docker compose down
+```
+
+El sitio estará disponible en **http://localhost:8080**.
+
+### Comandos Docker útiles
+
+```sh
+# Reconstruir la imagen desde cero (sin caché)
+docker compose build --no-cache
+
+# Ver el estado del contenedor
+docker compose ps
+
+# Acceder al contenedor
+docker exec -it yawar-app sh
+```
+
+---
+
+## Comandos Astro
+
+| Comando               | Acción                                            |
+| :-------------------- | :------------------------------------------------ |
+| `pnpm dev`            | Servidor de desarrollo en `localhost:4321`        |
+| `pnpm build`          | Build de producción en `./dist/`                  |
+| `pnpm preview`        | Previsualizar la build localmente                 |
+| `pnpm astro ...`      | Comandos CLI: `astro add`, `astro check`, etc.    |
+| `pnpm astro -- --help`| Ayuda del CLI de Astro                            |
