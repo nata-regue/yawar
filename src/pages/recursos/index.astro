@@ -1,7 +1,73 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import Info from "../../components/info/Info.astro";
+
+const API_URL = import.meta.env.PUBLIC_API_URL;
+const R2_BASE = import.meta.env.PUBLIC_R2_BASE_URL;
+
+interface Document {
+  id: string;
+  title: string;
+  description: string | null;
+  file_url: string;
+  file_name: string;
+  thumbnail_url: string | null;
+}
+
+let documents: Document[] = [];
+try {
+  const res = await fetch(`${API_URL}/documents`);
+  if (res.ok) documents = await res.json();
+} catch (_) {}
 ---
-<Layout>
-    <Info />
+
+<Layout title="Recursos — Yawar">
+  <Info />
+
+  {documents.length > 0 && (
+    <section class="flex justify-center bg-yawar-100 py-20 px-6">
+      <div class="w-full max-w-4xl flex flex-col gap-10">
+        <span class="font-caveatbrush text-5xl md:text-6xl text-center text-yawar-500">
+          Documentos
+        </span>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {documents.map((doc) => (
+            <div class="flex flex-col rounded-2xl overflow-hidden shadow-lg bg-white dark:bg-neutral-900 transition-transform duration-300 hover:-translate-y-1">
+              {doc.thumbnail_url ? (
+                <img
+                  src={`${R2_BASE}/${doc.thumbnail_url}`}
+                  alt={doc.title}
+                  class="h-40 w-full object-cover"
+                />
+              ) : (
+                <div class="h-40 w-full flex items-center justify-center bg-yawar-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-yawar-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+              )}
+              <div class="flex flex-col gap-2 p-4 flex-1">
+                <h3 class="font-bold text-neutral-700 dark:text-neutral-200 text-base leading-snug">
+                  {doc.title}
+                </h3>
+                {doc.description && (
+                  <p class="text-sm text-neutral-500 dark:text-neutral-400 line-clamp-3">
+                    {doc.description}
+                  </p>
+                )}
+                <a
+                  href={`${R2_BASE}/${doc.file_url}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="mt-auto inline-block rounded-lg bg-yawar-400 px-4 py-2 text-center text-sm font-bold text-white transition hover:bg-yawar-500"
+                >
+                  Descargar
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
 </Layout>

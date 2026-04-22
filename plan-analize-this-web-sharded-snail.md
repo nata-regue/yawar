@@ -59,8 +59,8 @@ Document in `yawar-api/README.md`: schema, where to find keys, how to add/remove
 
 ---
 
-### STEP 3 — Create `yawar-api` Python repo (FastAPI, ~3-4 hours)
-**New separate GitHub repo.** Structure:
+### STEP 3 — Create `yawar-api`  (FastAPI, ~3-4 hours)
+**Subfolder inside the existing `yawar` repo** (`yawar-api/` already exists and is populated). Structure:
 
 ```
 yawar-api/
@@ -75,8 +75,11 @@ yawar-api/
 ├── requirements.txt
 ├── Dockerfile
 ├── .env.example          # template with all required vars (no real values)
+├── .env                  # real values — gitignored, never commit
 └── README.md             # full setup + deployment instructions
 ```
+
+**Status: ✅ Complete** — all files created, API deployed at `https://yawar-api-vf.onrender.com`
 
 **Key endpoints:**
 | Method | Path | Auth required | Purpose |
@@ -113,15 +116,16 @@ python-dotenv
 
 ### STEP 4 — Deploy `yawar-api` to Render.com (~30 min)
 1. Create free account at render.com
-2. New Web Service → connect GitHub repo `yawar-api`
+2. New Web Service → connect GitHub repo `yawar` (the monorepo)
 3. Settings:
+   - **Root Directory:** `yawar-api`
    - Runtime: Python 3
    - Build command: `pip install -r requirements.txt`
    - Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-4. Add all env vars from `.env.example` with real values
-5. Note the deployed URL: `https://yawar-api.onrender.com`
+4. Add all env vars from `.env.example` with real values (Render → Environment tab)
+5. Deployed URL: `https://yawar-api-vf.onrender.com`
 
-Document in README: how to set env vars in Render dashboard, how to redeploy.
+**Status: ✅ Complete** — service live at `https://yawar-api-vf.onrender.com`
 
 **Note on free tier cold starts:** Render free services sleep after 15 min idle. Admin uploads will have a ~30s wait on first request. Acceptable for infrequent admin use.
 
@@ -142,8 +146,8 @@ Document in README: how to set env vars in Render dashboard, how to redeploy.
 **New env var in Astro** (`.env`):
 ```
 PUBLIC_API_URL=https://yawar-api.onrender.com
-PUBLIC_SUPABASE_URL=
-PUBLIC_SUPABASE_ANON_KEY=
+PUBLIC_SUPABASE_URL=https://qbbkxpdknykblknkuvms.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiYmt4cGRrbnlrYmxrbmt1dm1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3OTAyMDYsImV4cCI6MjA5MjM2NjIwNn0.yqMpQh7Coehx-f8wI906pfo0wCdr-8qPI62tRe36vyM
 ```
 
 ---
